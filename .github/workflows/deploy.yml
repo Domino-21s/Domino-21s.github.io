@@ -12,7 +12,7 @@ on:
 
 # 设置 GITHUB_TOKEN 的权限，以允许部署到 GitHub Pages
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
@@ -27,35 +27,27 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      # 1. 设置 PNPM
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v3
-        with:
-          version: 8.14.0  # 固定版本确保一致性
-      # 2. 设置 Node.js
-      - name: Setup Node.js
+          fetch-depth: 0 # 如果未启用 lastUpdated，则不需要
+      - uses: pnpm/action-setup@v3 # 使用 pnpm
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'  # 使用 PNPM 缓存
-      # 3. 安装依赖
+          node-version: 22.18.0
+          cache: pnpm # 缓存设置为 pnpm
+          version: 10.15.0 # 您可以根据需要指定特定的 pnpm 版本
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
       - name: Install dependencies
-        run: |
-          pnpm install 
-      # 4. 构建项目
-      - name: Build VitePress site
-        run: pnpm run build  # 确保 package.json 中有 "build" 脚本
-        
-      # 5. 上传构建产物
+        run: pnpm install # 使用 pnpm 安装依赖
+      - name: Build with VitePress
+        run: pnpm run build # 使用 pnpm 运行构建
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # VitePress 默认路径是 `.vitepress/dist`
-          path: .vitepress/dist  
+          path: docs/.vitepress/dist # 打包之后产物的文件夹
 
   # 部署工作
   deploy:
